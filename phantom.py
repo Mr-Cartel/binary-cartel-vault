@@ -185,13 +185,15 @@ def handle_github_sync(message):
     bot.send_message(chat_id, "⚡ <b>PIKACHU!</b> Initiating GitHub Sync...", parse_mode="HTML")
     
     try:
-        # Run the HTML generator script BEFORE pushing to GitHub!
-        subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", "build_ui.ps1"], cwd=VAULT_PATH)
+        # 1. Run the correct UI builder script using Linux PowerShell (pwsh)
+        subprocess.run(["pwsh", "-ExecutionPolicy", "Bypass", "-File", "nexus_builder.ps1"], cwd=VAULT_PATH, check=True)
         
+        # 2. Push everything to GitHub
         subprocess.run(["git", "add", "."], cwd=VAULT_PATH, check=True)
         subprocess.run(["git", "commit", "-m", "⚡ Auto-sync from Telegram Bot"], cwd=VAULT_PATH)
         subprocess.run(["git", "pull", "origin", "main", "--no-edit"], cwd=VAULT_PATH)
         subprocess.run(["git", "push"], cwd=VAULT_PATH, check=True)
+        
         bot.send_message(chat_id, "✅ <b>SYNC COMPLETE!</b>\nYour Binary Kartal website is updating now. 🚀", parse_mode="HTML")
     except Exception as e:
         bot.send_message(chat_id, f"❌ <b>SYNC FAILED:</b>\n<code>{str(e)}</code>", parse_mode="HTML")
