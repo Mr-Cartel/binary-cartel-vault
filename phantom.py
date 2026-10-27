@@ -187,10 +187,12 @@ def handle_github_sync(message):
     try:
         subprocess.run(["git", "add", "."], cwd=VAULT_PATH, check=True)
         subprocess.run(["git", "commit", "-m", "⚡ Auto-sync from Telegram Bot"], cwd=VAULT_PATH)
+        subprocess.run(["git", "pull", "origin", "main", "--no-edit"], cwd=VAULT_PATH)
         subprocess.run(["git", "push"], cwd=VAULT_PATH, check=True)
-        bot.send_message(chat_id, "✅ <b>SYNC COMPLETE!</b>\nYour Binary Kartal website is updating on Netlify now. 🚀", parse_mode="HTML")
+        bot.send_message(chat_id, "✅ <b>SYNC COMPLETE!</b>\nYour Binary Kartal website is updating now. 🚀", parse_mode="HTML")
     except Exception as e:
         bot.send_message(chat_id, f"❌ <b>SYNC FAILED:</b>\n<code>{str(e)}</code>", parse_mode="HTML")
+
 print("[SYSTEM] PYTHON PENTA-ENGINE ACTIVE ON LINUX 🚀🐍")
 bot.set_my_commands([
     telebot.types.BotCommand("/vault", "📂 Open Nexus Vault"),
