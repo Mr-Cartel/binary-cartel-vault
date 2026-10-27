@@ -185,6 +185,9 @@ def handle_github_sync(message):
     bot.send_message(chat_id, "⚡ <b>PIKACHU!</b> Initiating GitHub Sync...", parse_mode="HTML")
     
     try:
+        # Run the HTML generator script BEFORE pushing to GitHub!
+        subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", "build_ui.ps1"], cwd=VAULT_PATH)
+        
         subprocess.run(["git", "add", "."], cwd=VAULT_PATH, check=True)
         subprocess.run(["git", "commit", "-m", "⚡ Auto-sync from Telegram Bot"], cwd=VAULT_PATH)
         subprocess.run(["git", "pull", "origin", "main", "--no-edit"], cwd=VAULT_PATH)
