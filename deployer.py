@@ -1,43 +1,52 @@
 import telebot
 import subprocess
 import os
+import time
+from datetime import datetime
 import threading
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 TOKEN = '9175870752:AAEMoJlKbvID_ENKj9YvZ5JRM2Y2qV46V2g'
 VAULT_PATH = '/home/tejas/Project Nexus PDF version'
+CHAT_ID = None  # Locks onto your chat when you send /start
 
-# Boot up the Dedicated Deployer Engine 🏎️☁️
 bot = telebot.TeleBot(TOKEN, threaded=True, num_threads=10)
 
-def run_deployment(chat_id):
+class VaultWatcher(FileSystemEventHandler):
+    def on_created(self, event):
+        # Only trigger when a new PDF drops, ignoring HTML or Git background files
+        if not event.is_directory and event.src_path.lower().endswith('.pdf'):
+            if CHAT_ID:
+                file_name = os.path.basename(event.src_path)
+                current_time = datetime.now().strftime("%I:%M:%S %p | %b %d, %Y")
+                # Spin up a background thread so the watcher never freezes
+                threading.Thread(target=run_deployment, args=(file_name, current_time)).start()
+
+def run_deployment(file_name, current_time):
+    time.sleep(2) # Give the Phantom bot 2 seconds to completely finish writing the file
+    bot.send_message(CHAT_ID, f"🚨 <b>NEW PDF DETECTED!</b>\n📄 <b>File:</b> <code>{file_name}</code>\n⏰ <b>Time:</b> {current_time}\n\n⚙️ <i>Initiating Ghost-Link Auto-Deploy...</i>", parse_mode="HTML")
+    
     try:
-        bot.send_message(chat_id, "⚙️ <b>STEP 1/3: Rebuilding HTML Buttons...</b>\n<i>Running nexus_builder.ps1 via Linux PowerShell</i>", parse_mode="HTML")
         subprocess.run(["pwsh", "-ExecutionPolicy", "Bypass", "-File", "nexus_builder.ps1"], cwd=VAULT_PATH, check=True)
-        
-        bot.send_message(chat_id, "📦 <b>STEP 2/3: Packaging Files...</b>\n<i>Tracking new PDFs and HTML updates</i>", parse_mode="HTML")
         subprocess.run(["git", "add", "--all"], cwd=VAULT_PATH, check=True)
-        subprocess.run(["git", "commit", "-m", "⚡ Live Deployment via Deployer Bot"], cwd=VAULT_PATH)
-        
-        bot.send_message(chat_id, "☁️ <b>STEP 3/3: Pushing to GitHub...</b>\n<i>Syncing cloud repository</i>", parse_mode="HTML")
+        subprocess.run(["git", "commit", "-m", f"⚡ Auto-sync: {file_name}"], cwd=VAULT_PATH)
         subprocess.run(["git", "pull", "origin", "main", "--no-edit"], cwd=VAULT_PATH)
         subprocess.run(["git", "push"], cwd=VAULT_PATH, check=True)
         
-        bot.send_message(chat_id, "✅ <b>DEPLOYMENT COMPLETE!</b> 🚀\n\nYour Binary Kartal website is live. Press <b>Ctrl + Shift + R</b> on your browser to see the new glowing buttons!", parse_mode="HTML")
-        
-    except subprocess.CalledProcessError as e:
-        bot.send_message(chat_id, f"❌ <b>DEPLOYMENT CRASHED:</b>\n<code>{str(e)}</code>", parse_mode="HTML")
+        bot.send_message(CHAT_ID, f"✅ <b>DEPLOYMENT COMPLETE!</b> 🚀\n<code>{file_name}</code> is live on your website.", parse_mode="HTML")
     except Exception as e:
-        bot.send_message(chat_id, f"⚠️ <b>SYSTEM ERROR:</b>\n<code>{str(e)}</code>", parse_mode="HTML")
+        bot.send_message(CHAT_ID, f"❌ <b>DEPLOYMENT FAILED:</b>\n<code>{str(e)}</code>", parse_mode="HTML")
 
-@bot.message_handler(commands=['deploy', 'pikachu', 'start'])
-def handle_deploy(message):
-    chat_id = message.chat.id
-    bot.send_message(chat_id, "⚡ <b>INITIATING GHOST-LINK DEPLOYMENT ENGINE...</b> ⚡", parse_mode="HTML")
-    # Execute the heavy lifting in the background so the bot stays lightning fast! 🧠
-    threading.Thread(target=run_deployment, args=(chat_id,)).start()
+@bot.message_handler(commands=['start'])
+def activate_watchdog(message):
+    global CHAT_ID
+    CHAT_ID = message.chat.id
+    bot.send_message(CHAT_ID, "🐕 <b>GHOST WATCHDOG ONLINE & LOCKED!</b>\nI am monitoring your server 24/7. Drop a PDF into your Phantom Bot and I will automatically catch it, log the time, and push it to GitHub.", parse_mode="HTML")
 
-print("[SYSTEM] DEDICATED DEPLOYER BOT ONLINE 🚀☁️")
-bot.set_my_commands([
-    telebot.types.BotCommand("/deploy", "⚡ Launch Website Update")
-])
+print("[SYSTEM] AUTONOMOUS WATCHDOG DEPLOYER ONLINE 🚀🐕")
+observer = Observer()
+observer.schedule(VaultWatcher(), path=VAULT_PATH, recursive=True)
+observer.start()
+
 bot.infinity_polling(timeout=20, long_polling_timeout=15)
