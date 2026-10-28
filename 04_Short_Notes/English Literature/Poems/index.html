@@ -6165,7 +6165,7 @@
                 if (Math.abs(minDiffIst) < 1) {
                     grValIstDiff.innerText = '0 min (Exactly on 82\u00B030\'E IST)';
                 } else {
-                    grValIstDiff.innerText = (minDiffIst > 0 ? '+' : '') + minDiffIst + ' mins vs IST (' + Math.abs(degDiffIst).toFixed(2) + '\u00B0 ' + (degDiffIst > 0 ? 'East' : 'West') + ' of Mirzapur)';
+                     grValIstDiff.innerText = (minDiffIst > 0 ? '+' : '') + minDiffIst + ' mins vs IST (' + Math.abs(degDiffIst).toFixed(2) + '\u00B0 ' + (degDiffIst > 0 ? 'East' : 'West') + ' of Mirzapur)';
                 }
 
                 // Fetch Live Satellite Radar Elevation (Open-Meteo Elevation API)
@@ -6186,7 +6186,7 @@
                     });
             }
 
-            // 8. Initialize Leafvar Map with Satellite, Topo Contours & Cyber Dark Layers
+            // 8. Initialize Leaflet Map with Satellite, Topo Contours & Cyber Dark Layers
             function initLeafletMap() {
                 if (map || !window.L) return;
                 var L = window.L;
@@ -6213,7 +6213,7 @@
                     attribution: 'OpenTopoMap Contours'
                 });
 
-                                // Layer 3: Esri World Dark Canvas (100% Free, Zero API Key Required!)
+                // Layer 3: Esri World Dark Canvas (100% Free, Zero API Key Required!)
                 var darkBasemap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
                     maxZoom: 16,
                     attribution: 'Esri Dark Canvas'
@@ -6619,7 +6619,6 @@
                 grModal.classList.remove('open');
             });
         })();
-
     </script>
 </body>
 </html>

@@ -6203,7 +6203,7 @@ $buttonsHtml
                 if (Math.abs(minDiffIst) < 1) {
                     grValIstDiff.innerText = '0 min (Exactly on 82\u00B030\'E IST)';
                 } else {
-                    grValIstDiff.innerText = (minDiffIst > 0 ? '+' : '') + minDiffIst + ' mins vs IST (' + Math.abs(degDiffIst).toFixed(2) + '\u00B0 ' + (degDiffIst > 0 ? 'East' : 'West') + ' of Mirzapur)';
+                     grValIstDiff.innerText = (minDiffIst > 0 ? '+' : '') + minDiffIst + ' mins vs IST (' + Math.abs(degDiffIst).toFixed(2) + '\u00B0 ' + (degDiffIst > 0 ? 'East' : 'West') + ' of Mirzapur)';
                 }
 
                 // Fetch Live Satellite Radar Elevation (Open-Meteo Elevation API)
@@ -6224,7 +6224,7 @@ $buttonsHtml
                     });
             }
 
-            // 8. Initialize Leafvar Map with Satellite, Topo Contours & Cyber Dark Layers
+            // 8. Initialize Leaflet Map with Satellite, Topo Contours & Cyber Dark Layers
             function initLeafletMap() {
                 if (map || !window.L) return;
                 var L = window.L;
@@ -6251,7 +6251,7 @@ $buttonsHtml
                     attribution: 'OpenTopoMap Contours'
                 });
 
-                                // Layer 3: Esri World Dark Canvas (100% Free, Zero API Key Required!)
+                // Layer 3: Esri World Dark Canvas (100% Free, Zero API Key Required!)
                 var darkBasemap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
                     maxZoom: 16,
                     attribution: 'Esri Dark Canvas'
@@ -6657,14 +6657,13 @@ $buttonsHtml
                 grModal.classList.remove('open');
             });
         })();
-
     </script>
 </body>
 </html>
 "@;
 
-    if ($CurrentFolder -ne$basePath) {
-        $outputPath = "$CurrentFolder\index.html";
+    if ($CurrentFolder -ne $basePath) {
+        $outputPath = "$CurrentFolder/index.html";
         Set-Content -Path ($outputPath) -Value ($htmlContent) -Encoding UTF8;
     }
 }
@@ -6673,12 +6672,13 @@ Build-DirectoryUI -CurrentFolder ($basePath);
 Write-Host "Search Terminal Deployed Everywhere!";
 $allPdfs = @(Get-ChildItem -Path ($basePath) -Filter "*.pdf" -Recurse);
 $indexEntries = @();
-foreach ($pdf in ($allPdfs)) {$relPath = $pdf.FullName.Substring($basePath.Length + 1).Replace("\", "/");
+foreach ($pdf in ($allPdfs)) {
+    $relPath = $pdf.FullName.Substring($basePath.Length + 1).Replace("\", "/");
     $folderName =$pdf.Directory.Name.Replace("_", " ");
     $cleanName =$pdf.Name.Replace('"', '\"');
     $indexEntries += "{ name: `"$cleanName`", url: `"$relPath`", sector: `"$folderName`" }";
 }
 $jsIndex = "window.CARTEL_INDEX = [" + ($indexEntries -join ",") + "];";
-Set-Content -Path ("$basePath\vault_index.js") -Value ($jsIndex) -Encoding UTF8;
+Set-Content -Path ("$basePath/vault_index.js") -Value ($jsIndex) -Encoding UTF8;
 Write-Host "Omniverse Deep-Warp Index Built Successfully!";
-
+                    
