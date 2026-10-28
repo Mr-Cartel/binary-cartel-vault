@@ -179,32 +179,7 @@ def process_download(chat_id, folder_path, file_info):
             msg = f"✅ <b>UPLOAD & SYNC SUCCESSFUL</b>\n<code>{clean_name}</code>\n\n🌐 <b>Check your website:</b>\n<a href='{safe_url}'>{safe_url}</a>"
             bot.send_message(chat_id, msg, parse_mode="HTML", disable_web_page_preview=True)
     except: pass
-@bot.message_handler(commands=['pikachu'])
-def handle_github_sync(message):
-    chat_id = message.chat.id
-    bot.send_message(chat_id, "⚡ <b>PIKACHU!</b> Initiating HTML Build & GitHub Sync...", parse_mode="HTML")
-    
-    try:
-        # Force the UI generator to run
-        subprocess.run(["pwsh", "-ExecutionPolicy", "Bypass", "-File", "nexus_builder.ps1"], cwd=VAULT_PATH, check=True)
-        
-        # Add all files, including newly generated index.html files
-        subprocess.run(["git", "add", "--all"], cwd=VAULT_PATH, check=True)
-        
-        # Commit the updates
-        subprocess.run(["git", "commit", "-m", "⚡ Auto-sync from Telegram Bot"], cwd=VAULT_PATH)
-        
-        # Pull and push
-        subprocess.run(["git", "pull", "origin", "main", "--no-edit"], cwd=VAULT_PATH)
-        subprocess.run(["git", "push"], cwd=VAULT_PATH, check=True)
-        
-        bot.send_message(chat_id, "✅ <b>SYNC COMPLETE!</b>\nYour Binary Kartal HTML buttons are updating now. 🚀", parse_mode="HTML")
-    except Exception as e:
-        bot.send_message(chat_id, f"❌ <b>SYNC FAILED:</b>\n<code>{str(e)}</code>", parse_mode="HTML")
 
 print("[SYSTEM] PYTHON PENTA-ENGINE ACTIVE ON LINUX 🚀🐍")
-bot.set_my_commands([
-    telebot.types.BotCommand("/vault", "📂 Open Nexus Vault"),
-    telebot.types.BotCommand("/pikachu", "⚡ Sync Website")
-])
+bot.set_my_commands([telebot.types.BotCommand("/vault", "📂 Open Nexus Vault")])
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
