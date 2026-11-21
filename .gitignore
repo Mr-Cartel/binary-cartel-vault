@@ -4,3 +4,6 @@
 deployer.py
 phantom.py
 watchdog_chat_id.txt
+interstellar.py
+interstellar_state.json
+interstellar_pdf_cache.json
